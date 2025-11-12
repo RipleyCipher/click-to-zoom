@@ -84,12 +84,20 @@ Open the **Scripts** window and select `click-to-zoom.lua` to configure:
 - On Mac, manual monitor height may be needed for correct Y coordinate handling.
 - Dual machine/remote mouse tracking is described in the original project but not implemented in this fork.
 
+## Additional notes
+- In order for this script to work on Fedora Linux 43, it's necessary to execute OBS with the following setting: QT_QPA_PLATFORM=xcb, in order to avoid the execution with Wayland, which avoid sharing mouse position between different applications.
+
+<img width="829" height="433" alt="image" src="https://github.com/user-attachments/assets/72512d3f-4e4a-4e7b-819a-508b953262c0" />
+
+
 ---
 
 ## Credits
 - **Original Author:** [BlankSourceCode/obs-zoom-to-mouse](https://github.com/BlankSourceCode/obs-zoom-to-mouse)
+- **Forked by eadmin2:** https://github.com/eadmin2/click-to-zoom
 - **Forked as:** click-to-zoom (this project)
 - **Inspired by:** [tryptech/obs-zoom-and-follow](https://github.com/tryptech/obs-zoom-and-follow)
+- **Inspired by:** [giswqs/obs-zoom-to-mouse](https://github.com/giswqs/obs-zoom-to-mouse)
 
 ---
 
