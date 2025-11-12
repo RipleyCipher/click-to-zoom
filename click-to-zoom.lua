@@ -566,6 +566,25 @@ function get_mouse_pos()
     return mouse
 end
 
+-- Aggressive set of Linux display-capture IDs across OBS builds/plugins (credits to giswqs)
+local LINUX_DC_IDS = {
+    -- X11
+    ["xshm_input"] = true,
+    -- Wayland / PipeWire (OBS upstream)
+    ["screen_capture"] = true,
+    ["wayland_capture"] = true,
+    ["pipewire-desktop-capture"] = true,
+    ["pipewire-desktop-capture-source"] = true,
+    ["pipewire-desktop-capture-ui"] = true,
+    ["pipewire-screen-capture-source"] = true,
+    -- wlrobs plugin variants (some distros)
+    ["wlrobs_monitor_capture"] = true,
+    ["wlrobs_output_capture"] = true,
+    -- Older naming (rare)
+    ["monitor_capture"] = true,
+    ["display_capture"] = true,
+}
+
 ---
 -- Get the information about display capture sources for the current platform
 ---@return any
@@ -1432,21 +1451,35 @@ function script_save(settings)
     end
 end
 
+-- modified to work on Linux - credits to giswqs
 function populate_zoom_sources(list)
     obs.obs_property_list_clear(list)
-
+    obs.obs_property_list_add_string(list, "<None>", "obs-zoom-to-mouse-none")
+        local any_added = false
     local sources = obs.obs_enum_sources()
     if sources ~= nil then
-        local dc_info = get_dc_info()
-        obs.obs_property_list_add_string(list, "<None>", "click_to_zoom-none")
-        for _, source in ipairs(sources) do
-            local source_type = obs.obs_source_get_id(source)
-            if source_type == dc_info.source_id or allow_all_sources then
-                local name = obs.obs_source_get_name(source)
+        for _, s in ipairs(sources) do
+            local id = obs.obs_source_get_id(s)
+            local name = obs.obs_source_get_name(s)
+            -- accept if it's display capture or user opted to allow all
+            if allow_all_sources or is_display_capture(s) then
                 obs.obs_property_list_add_string(list, name, name)
+                any_added = true
             end
         end
-
         obs.source_list_release(sources)
+    end
+
+    if not any_added then
+        -- Fallback to ALL so user can still select manually
+        sources = obs.obs_enum_sources()
+        if sources ~= nil then
+            for _, s in ipairs(sources) do
+                local name = obs.obs_source_get_name(s)
+                obs.obs_property_list_add_string(list, name, name)
+            end
+            obs.source_list_release(sources)
+        end
+        log("No display-capture IDs recognized on this system; fell back to showing ALL sources in dropdown.")
     end
 end
